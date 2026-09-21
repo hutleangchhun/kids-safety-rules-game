@@ -1,0 +1,250 @@
+import { useMemo, useState } from 'react';
+
+type Choice = {
+  text: string;
+  isCorrect: boolean;
+};
+
+type Question = {
+  id: number;
+  category: string;
+  icon: string;
+  prompt: string;
+  choices: Choice[];
+  explanation: string;
+};
+
+const questions: Question[] = [
+  {
+    id: 1,
+    category: 'Road Safety',
+    icon: '🚦',
+    prompt: 'You want to cross the road. What should you do first?',
+    choices: [
+      { text: 'Run quickly', isCorrect: false },
+      { text: 'Look left and right, then cross at a safe place', isCorrect: true },
+      { text: 'Cross while texting', isCorrect: false },
+      { text: 'Cross between parked cars', isCorrect: false }
+    ],
+    explanation: 'Safe crossing means stopping, looking carefully, and using a pedestrian crossing or a safe place.'
+  },
+  {
+    id: 2,
+    category: 'Home Safety',
+    icon: '🏠',
+    prompt: 'If you see a sharp object on the floor, what should you do?',
+    choices: [
+      { text: 'Leave it there and walk past it', isCorrect: false },
+      { text: 'Pick it up with your hands and keep walking', isCorrect: false },
+      { text: 'Tell an adult and keep away from it', isCorrect: true },
+      { text: 'Throw it in a toy box', isCorrect: false }
+    ],
+    explanation: 'Sharp objects can hurt you. Tell an adult and stay away until it is cleaned up safely.'
+  },
+  {
+    id: 3,
+    category: 'Fire Safety',
+    icon: '🔥',
+    prompt: 'What is the best thing to do if there is a fire in your home?',
+    choices: [
+      { text: 'Hide under the bed', isCorrect: false },
+      { text: 'Call for help and go to a safe place with an adult', isCorrect: true },
+      { text: 'Keep playing', isCorrect: false },
+      { text: 'Take a long nap', isCorrect: false }
+    ],
+    explanation: 'Get away from danger and go with an adult to a safe meeting place. Always tell a grown-up right away.'
+  },
+  {
+    id: 4,
+    category: 'Water Safety',
+    icon: '🌊',
+    prompt: 'Which action is safest near water?',
+    choices: [
+      { text: 'Swim with a trusted adult watching', isCorrect: true },
+      { text: 'Jump in without checking depth', isCorrect: false },
+      { text: 'Play with your phone near the pool', isCorrect: false },
+      { text: 'Run around the pool edge', isCorrect: false }
+    ],
+    explanation: 'Water can be dangerous. Always swim where an adult is watching and follow safety rules.'
+  },
+  {
+    id: 5,
+    category: 'Stranger Safety',
+    icon: '🛡️',
+    prompt: 'If a stranger offers you a ride or asks you to go somewhere with them, what should you do?',
+    choices: [
+      { text: 'Say yes and go with them', isCorrect: false },
+      { text: 'Run to them and hug them', isCorrect: false },
+      { text: 'Say no, move away, and tell a trusted adult', isCorrect: true },
+      { text: 'Take their phone to call your parents', isCorrect: false }
+    ],
+    explanation: 'Never go with a stranger. Move away and tell a trusted adult right away.'
+  },
+  {
+    id: 6,
+    category: 'Online Safety',
+    icon: '💻',
+    prompt: 'What should you do before talking to someone online?',
+    choices: [
+      { text: 'Share your private information right away', isCorrect: false },
+      { text: 'Ask a trusted adult first and keep personal details private', isCorrect: true },
+      { text: 'Accept every friend request', isCorrect: false },
+      { text: 'Post your home address publicly', isCorrect: false }
+    ],
+    explanation: 'Keep personal information private and ask a trusted adult before online conversations or sharing pictures.'
+  },
+  {
+    id: 7,
+    category: 'School Safety',
+    icon: '🎒',
+    prompt: 'If you feel unsafe at school, what is the best action?',
+    choices: [
+      { text: 'Stay quiet and do nothing', isCorrect: false },
+      { text: 'Tell a teacher, school staff member, or trusted adult', isCorrect: true },
+      { text: 'Leave the school alone', isCorrect: false },
+      { text: 'Hide in the bathroom all day', isCorrect: false }
+    ],
+    explanation: 'Your teachers and trusted adults are there to help keep you safe.'
+  },
+  {
+    id: 8,
+    category: 'Healthy Choices',
+    icon: '🥗',
+    prompt: 'What should you do if someone offers you medicine without an adult telling you to take it?',
+    choices: [
+      { text: 'Take it because it is a medicine', isCorrect: false },
+      { text: 'Ask a trusted adult before taking any medicine', isCorrect: true },
+      { text: 'Take it quickly before they change their mind', isCorrect: false },
+      { text: 'Share it with friends', isCorrect: false }
+    ],
+    explanation: 'Only take medicine with the guidance of a trusted adult or doctor.'
+  }
+];
+
+function App() {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = useMemo(
+    () => ((currentQuestionIndex + (showAnswer ? 1 : 0)) / questions.length) * 100,
+    [currentQuestionIndex, showAnswer]
+  );
+
+  const handleAnswer = (choiceIndex: number) => {
+    if (selectedAnswerIndex !== null) return;
+
+    setSelectedAnswerIndex(choiceIndex);
+    setShowAnswer(true);
+
+    if (currentQuestion.choices[choiceIndex].isCorrect) {
+      setScore((previous) => previous + 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex === questions.length - 1) {
+      setCurrentQuestionIndex(0);
+      setSelectedAnswerIndex(null);
+      setShowAnswer(false);
+      setScore(0);
+      return;
+    }
+
+    setCurrentQuestionIndex((previous) => previous + 1);
+    setSelectedAnswerIndex(null);
+    setShowAnswer(false);
+  };
+
+  const isLastQuestion = currentQuestionIndex === questions.length - 1 && showAnswer;
+  const correctChoiceIndex = currentQuestion.choices.findIndex((choice) => choice.isCorrect);
+
+  return (
+    <div className="page-shell">
+      <div className="game-card">
+        <header className="topbar">
+          <div>
+            <p className="eyebrow">Safety Adventure</p>
+            <h1>Safety Star Game</h1>
+          </div>
+          <div className="score-box" aria-label="score">
+            <span>⭐</span>
+            <strong>{score}</strong>
+          </div>
+        </header>
+
+        <div className="progress-wrap" aria-label="progress">
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <p>
+            Question {currentQuestionIndex + 1} of {questions.length}
+          </p>
+        </div>
+
+        <section className="question-panel">
+          <div className="category-badge">
+            <span>{currentQuestion.icon}</span>
+            {currentQuestion.category}
+          </div>
+
+          <h2>{currentQuestion.prompt}</h2>
+
+          <div className="options-list">
+            {currentQuestion.choices.map((choice, index) => {
+              const isSelected = selectedAnswerIndex === index;
+              const revealCorrect = showAnswer && choice.isCorrect;
+              const revealWrong = showAnswer && isSelected && !choice.isCorrect;
+
+              return (
+                <button
+                  key={choice.text}
+                  type="button"
+                  className={[
+                    'option-button',
+                    revealCorrect ? 'correct' : '',
+                    revealWrong ? 'wrong' : '',
+                    isSelected ? 'selected' : ''
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => handleAnswer(index)}
+                  disabled={showAnswer}
+                >
+                  {choice.text}
+                </button>
+              );
+            })}
+          </div>
+
+          {showAnswer && (
+            <div className="feedback-box">
+              <p
+                className={
+                  currentQuestion.choices[selectedAnswerIndex ?? correctChoiceIndex].isCorrect ? 'good' : 'bad'
+                }
+              >
+                {currentQuestion.choices[selectedAnswerIndex ?? correctChoiceIndex].isCorrect
+                  ? 'Great job! You chose the safe answer.'
+                  : 'Nice try! Here is the right idea.'}
+              </p>
+              <p>{currentQuestion.explanation}</p>
+            </div>
+          )}
+
+          {showAnswer && (
+            <div className="action-row">
+              <button type="button" className="next-button" onClick={handleNext}>
+                {isLastQuestion ? 'Play Again' : 'Next Question'}
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+export default App;
